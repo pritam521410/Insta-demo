@@ -43,6 +43,40 @@ export const register = async (req, res) => {
 
 
 
+export const getuserById = async(req , res)=>{
+
+  try{
+    const {id} = req.params;
+
+    const existUser = await User.findOne({_id : id})
+
+    if(!existUser){
+      return res.status(404).json({success : false , message : "User not found"})
+    }
+
+    res.status(200).json({success : true , message : "User found successfully" , data : existUser})
+   
+  }catch(error){
+    return res.status(500).json({success : false , message : "Internal server error" , error : error.message})
+
+  }
+
+}
+
+export const getallUser = async(req, res)=>{
+  try{
+    const existUser = await User.find();
+    if(!existUser){
+      return res.status(404).json({success : false , message : "user not found"})
+    }
+
+    res.status(200).json({success : true , message : "All User found Successfully" , data : existUser})
+
+  }catch(error){
+    return res.status(500).json({success : false , message : "Internal server error" , error : error.message})
+  }
+}
+
 
 export const loginUser = async(req, res)=>{
   try{
@@ -92,5 +126,19 @@ export const loginUser = async(req, res)=>{
   }catch(error){
     return res.status(500).json({success : false , message : "Internal server error" , error : error.message })
   }
+
+}
+
+export const logoutUser = async(req, res)=>{
+
+  res.clearCookie("token",
+    {
+      httpOnly : true,
+      sameSite : "strict"
+    }
+
+  )
+
+  res.status(200).json({success: true , message : "User logout Successfully"})
 
 }
