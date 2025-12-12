@@ -46,7 +46,9 @@ export const register = async (req, res) => {
 export const getuserById = async(req , res)=>{
 
   try{
-    const {id} = req.params;
+   
+    const {id } = req.query;
+    
 
     const existUser = await User.findOne({_id : id})
 
@@ -66,10 +68,39 @@ export const getuserById = async(req , res)=>{
 export const getallUser = async(req, res)=>{
   try{
     const existUser = await User.find();
+    const {role , page = 1 , limit =10 } = req.query;
     if(!existUser){
       return res.status(404).json({success : false , message : "user not found"})
     }
 
+
+    const filter = {}
+    if(role){
+      filter.role = role;
+    }
+
+   const pageNum = Math.max(Number(page))
+   const limitNum = Math.max(Number(limit))
+
+   const skip = (pageNum - 1) * pageNum;
+
+
+   const totalDocs = await User.countDocuments(filter)
+
+   const user = await User.find(filter)
+     .sort({ createdAt: -1 })
+   .skip(skip)
+   .limit(limitNum)
+
+   const totalPages = Math.ceil(totalDocs / limitNum)
+
+   
+  res.status(200).json({success: true , data : user,
+    currentPage : pageNum,
+    limit : limitNum,
+    totalPages,
+
+  })
     res.status(200).json({success : true , message : "All User found Successfully" , data : existUser})
 
   }catch(error){
